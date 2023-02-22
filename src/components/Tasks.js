@@ -20,6 +20,23 @@ const Tasks = () => {
         setUpdatingTask(task);
     }
 
+    const handleDeleteTask = async (e, task) => {
+        e.preventDefault();
+
+        await fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks/'+`${task.id}`, {
+            method: 'DELETE',
+            }).then(res => {
+            if (res.ok) {
+                alert("Task Deleted");
+                window.location.reload(false);
+            }
+            }).catch(error => {
+                alert("Something went wrong");
+                console.log(error);
+            })
+
+    }
+
     const TableData = () => {
         return (
             <table className="table">
@@ -43,6 +60,7 @@ const Tasks = () => {
                             <td>{ task.createdAt }</td>
                             <td>{ task.isCompleted ? "Completed" : "Pending" }</td>
                             <td><span className='btn btn-primary' onClick={(e)=> handleUpdateTask(e,task)}>Update</span></td>
+                            <td><span className='btn btn-danger' onClick={(e)=> handleDeleteTask(e,task)}>Delete</span></td>
                         </tr>    
                     ))}
                 </tbody>

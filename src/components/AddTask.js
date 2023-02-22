@@ -10,7 +10,7 @@ const AddTask = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        let data = { title, description, deadline, isCompleted: false, createdAt: new Date().toISOString() };
+        let data = { title, description, deadline, isCompleted: false, createdAt: new Date().toDateString() };
 
         await fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks', {
             method: 'POST',
