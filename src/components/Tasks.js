@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 
+import UpdateTask from './UpdateTask'
+
 const Tasks = () => {
     const [tasks, setTasks] = useState([]);
-    
+    const [isUpdateShown, setUpdateShown] = useState(false);
+    const [updatingTask, setUpdatingTask] = useState({});
+
     useEffect(() => {
         fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks')
         .then(response => response.json())
         .then(data => setTasks(data))
     }, []);
 
-    return (
-        <div>
+    const handleUpdateTask = (e, task) => {
+        e.preventDefault();
+        // console.log(task);
+        setUpdateShown(true); 
+        setUpdatingTask(task);
+    }
+
+    const TableData = () => {
+        return (
             <table className="table">
                 <thead>
                     <tr>
@@ -31,10 +42,19 @@ const Tasks = () => {
                             <td>{ task.deadline }</td>
                             <td>{ task.createdAt }</td>
                             <td>{ task.isCompleted ? "Completed" : "Pending" }</td>
+                            <td><span className='btn btn-primary' onClick={(e)=> handleUpdateTask(e,task)}>Update</span></td>
                         </tr>    
                     ))}
                 </tbody>
             </table>
+        )
+    }
+
+
+    return (
+        <div>
+            {isUpdateShown ? <UpdateTask task={updatingTask} /> : <TableData />}
+
                     
         </div>
     );
