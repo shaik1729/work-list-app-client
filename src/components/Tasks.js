@@ -1,30 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from "axios";
 
 const Tasks = () => {
-    const [tasks, setTasks] = useState([]);
 
+    const api_base_url = 'http://localhost:3000/api/v1/tasks'
+
+    const [tasks, setTasks] = useState([]);
+    
+    const getTasks = () => {
+
+        var config = {
+          method: 'get',
+          url: api_base_url,
+          headers: { 
+            'x-auth-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImRhdmlkIiwidXNlcmlkIjoyLCJpYXQiOjE2NzczODc0MTB9.zNgyky8Ly9EuLPJloi9O-8Ok5MEWwJcLOcmHqIoPazw'
+          }
+        };
+        
+        axios(config)
+        .then(function (response) {
+          setTasks(response.data.data);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+                
+    }
+    
     useEffect(() => {
-        fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks')
-        .then(response => response.json())
-        .then(data => setTasks(data))
+        getTasks()
     }, []);
 
 
-    const handleDeleteTask = async (e, id) => {
-        console.log("in delete", id)
-        await fetch(`https://63f45ed32213ed989c414b54.mockapi.io/tasks/${id}`, {
-            method: 'DELETE',
-            }).then(res => {
-            if (res.ok) {
-                alert("Task Deleted");
-                window.location.reload(false);
-            }
-            }).catch(error => {
-                alert("Something went wrong");
-                console.log(error);
-            })
 
+
+    const handleDeleteTask = (e, id) => {
+        console.log("in delete", id);
+
+        var config = {
+            method: 'delete',
+            url: `${api_base_url}/${id}`,
+            headers: { 
+              'x-auth-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNoYWlrdGFqIiwidXNlcmlkIjo5LCJpYXQiOjE2Nzc1NjMwNzUsImV4cCI6MTY3NzU2NjY3NX0._9XD9-NCsphGCSEO6jY1G171GLmM-rBWa8UEI2j7k8k'
+            }
+            
+          };
+          
+          axios(config)
+          .then(function (response) {
+            console.log(response.data);
+            getTasks();
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
     }
 
     const TableData = () => {
@@ -35,9 +65,6 @@ const Tasks = () => {
                     <th scope="col">ID</th>
                     <th scope="col">Title</th>
                     <th scope="col">Description</th>
-                    <th scope="col">Deadline</th>
-                    <th scope="col">Created At</th>
-                    <th scope="col">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,9 +73,6 @@ const Tasks = () => {
                             <td>{ task.id }</td>
                             <td>{ task.title }</td>
                             <td>{ task.description }</td>
-                            <td>{ task.deadline }</td>
-                            <td>{ task.createdAt }</td>
-                            <td>{ task.isCompleted ? "Completed" : "Pending" }</td>
                             <td> <Link to={`/task/${task.id}/edit`} className='btn btn-info'>update</Link></td>
                             <td><span className='btn btn-danger' onClick={(e)=> handleDeleteTask(e, task.id)}>Delete</span></td>
                         </tr>    

@@ -3,58 +3,77 @@ import React from 'react'
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import axios from "axios";
+var qs = require('qs');
+
+const api_base_url = 'http://localhost:3000/api/v1/tasks'
+
+
 const UpdateTask = () => {
 
     const { id } = useParams();
 
-    const [task, setTask] = useState({});
+
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+
 
     const navigater = useNavigate();
 
 
     useEffect(()=> {
-        fetch(`https://63f45ed32213ed989c414b54.mockapi.io/tasks/${id}`)
-        .then(response => response.json())
-        .then(data => setTask(data))
+        getTasks();
     }, [])
-   
 
-    const handleOnChange = (e) => {
-        const { name, value, type } = e.target;
+    
+    const getTasks = () => {
 
-        if(type === 'checkbox') {
-            setTask((prevTask) => {
-                return { ...prevTask, [name]: e.target.checked }
-            });
-        }else{
-            setTask((prevTask) => {
-                return { ...prevTask, [name]: value }
-            });
-        }
-
+        var config = {
+          method: 'get',
+          url: `${api_base_url}/${id}`,
+          headers: { 
+            'x-auth-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNoYWlrdGFqIiwidXNlcmlkIjo5LCJpYXQiOjE2Nzc1NjMwNzUsImV4cCI6MTY3NzU2NjY3NX0._9XD9-NCsphGCSEO6jY1G171GLmM-rBWa8UEI2j7k8k'
+          }
+        };
+        
+        axios(config)
+        .then(function (response) {
+            setTitle(response.data.data.title);
+            setDescription(response.data.data.description);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+                
     }
 
-    const taskUpdate = async (e) => {
-        
-        const data = {
-            title: task.title,
-            description: task.description,
-            deadline: task.deadline,
-            isCompleted: task.isCompleted
-        }
 
-        await fetch(`https://63f45ed32213ed989c414b54.mockapi.io/tasks/${id}`, {
-            method: 'PUT',
-            headers: {'content-type':'application/json'},
-            // Send your data in the request body as JSON
-            body: JSON.stringify(data)
-            }).then(res => {
-            if (res.ok) {
-                console.log("Task Updated");
-            }
-            }).catch(error => {
-                console.log(error);
-            })
+    const taskUpdate = (e) => {
+        
+        var data = qs.stringify({
+            'title': title,
+            'description': description 
+        });
+
+        var config = {
+            method: 'put',
+            url: `${api_base_url}/${id}`,
+            headers: { 
+                'x-auth-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNoYWlrdGFqIiwidXNlcmlkIjo5LCJpYXQiOjE2Nzc1NjMwNzUsImV4cCI6MTY3NzU2NjY3NX0._9XD9-NCsphGCSEO6jY1G171GLmM-rBWa8UEI2j7k8k', 
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data : data
+        };
+
+        axios(config)
+            .then(function (response) {
+            console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
+       
     };
 
     const handleUpdate = (e) => {
@@ -63,6 +82,8 @@ const UpdateTask = () => {
         navigater('/tasks');
     }
 
+
+
     return (
         <>
         <div className="container mt-2">
@@ -70,21 +91,11 @@ const UpdateTask = () => {
             <form onSubmit={(e) => handleUpdate(e) }>
                 <div className="mb-3">
                     <label htmlFor="title" className="from-label">Title</label>
-                    <input type="text" id="title" className="form-control" name="title" onChange={handleOnChange} value={task.title || ""}  />
+                    <input type="text" id="title" className="form-control" name="title" onChange={(e) => setTitle(e.target.value)} value={title}  />
                 </div>
                 <div className="mb-3">
                     <label htmlFor="description" className="from-label">Description</label>
-                    <textarea id="description" className="form-control" name="description" onChange={handleOnChange} value={task.description || ""} />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="deadline" className="from-label">Deadline</label>
-                    <input type="date" id="deadline" className="form-control" name="deadline" onChange={handleOnChange} value={task.deadline || ""}  />
-                </div>
-                <div className="mb-3">
-                    <div className="input-group-text">
-                        <input className="form-check-input mt-0 me-3" type="checkbox" name="isCompleted" aria-label="Checkbox for following text input" onChange={handleOnChange} checked={task.isCompleted || false} />
-                        <label htmlFor="deadline" className="from-label">Completed?</label>
-                    </div>
+                    <textarea id="description" className="form-control" name="description" onChange={(e) => setDescription(e.target.value)} value={description}  />
                 </div>
                 <button type="submit" className="btn btn-primary">Submit</button>
             </form>
