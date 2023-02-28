@@ -1,56 +1,88 @@
 import React from 'react'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
+const UpdateTask = () => {
+
+    const { id } = useParams();
+
+    const [task, setTask] = useState({});
+
+    const navigater = useNavigate();
 
 
-const AddTask = (props) => {
+    useEffect(()=> {
+        fetch(`https://63f45ed32213ed989c414b54.mockapi.io/tasks/${id}`)
+        .then(response => response.json())
+        .then(data => setTask(data))
+    }, [])
+   
 
-    const [title, setTitle] = useState(props.task.title);
-    const [description, setDescription] = useState(props.task.description);
-    const [deadline, setDeadline] = useState(props.task.deadline);
-    const [isCompleted, setIsCompleted] = useState(false);
+    const handleOnChange = (e) => {
+        const { name, value, type } = e.target;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        let data = { title, description, deadline, isCompleted };
-        console.log(data)
+        if(type === 'checkbox') {
+            setTask((prevTask) => {
+                return { ...prevTask, [name]: e.target.checked }
+            });
+        }else{
+            setTask((prevTask) => {
+                return { ...prevTask, [name]: value }
+            });
+        }
 
-        await fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks/'+`${props.task.id}`, {
+    }
+
+    const taskUpdate = async (e) => {
+        
+        const data = {
+            title: task.title,
+            description: task.description,
+            deadline: task.deadline,
+            isCompleted: task.isCompleted
+        }
+
+        await fetch(`https://63f45ed32213ed989c414b54.mockapi.io/tasks/${id}`, {
             method: 'PUT',
             headers: {'content-type':'application/json'},
             // Send your data in the request body as JSON
             body: JSON.stringify(data)
             }).then(res => {
             if (res.ok) {
-                alert("Task Updated");
-                window.location.reload(false);
+                console.log("Task Updated");
             }
             }).catch(error => {
-                alert("Something went wrong");
                 console.log(error);
             })
     };
+
+    const handleUpdate = (e) => {
+        e.preventDefault();
+        taskUpdate();
+        navigater('/tasks');
+    }
 
     return (
         <>
         <div className="container mt-2">
         <h1>Update Task</h1>
-            <form onSubmit={(e) => handleSubmit(e) }>
+            <form onSubmit={(e) => handleUpdate(e) }>
                 <div className="mb-3">
                     <label htmlFor="title" className="from-label">Title</label>
-                    <input type="text" id="title" className="form-control" onChange={(e) => setTitle(e.target.value)} value={title} />
+                    <input type="text" id="title" className="form-control" name="title" onChange={handleOnChange} value={task.title || ""}  />
                 </div>
                 <div className="mb-3">
                     <label htmlFor="description" className="from-label">Description</label>
-                    <textarea id="description" className="form-control" onChange={(e) => setDescription(e.target.value)} value={description} />
+                    <textarea id="description" className="form-control" name="description" onChange={handleOnChange} value={task.description || ""} />
                 </div>
                 <div className="mb-3">
                     <label htmlFor="deadline" className="from-label">Deadline</label>
-                    <input type="date" id="deadline" className="form-control" onChange={(e) => setDeadline(e.target.value)} value={deadline} />
+                    <input type="date" id="deadline" className="form-control" name="deadline" onChange={handleOnChange} value={task.deadline || ""}  />
                 </div>
                 <div className="mb-3">
                     <div className="input-group-text">
-                        <input className="form-check-input mt-0 me-3" type="checkbox" value="false" aria-label="Checkbox for following text input" onClick={(e) => setIsCompleted(true)}  />
+                        <input className="form-check-input mt-0 me-3" type="checkbox" name="isCompleted" aria-label="Checkbox for following text input" onChange={handleOnChange} checked={task.isCompleted || false} />
                         <label htmlFor="deadline" className="from-label">Completed?</label>
                     </div>
                 </div>
@@ -61,4 +93,4 @@ const AddTask = (props) => {
     )
 }
 
-export default AddTask;
+export default UpdateTask;

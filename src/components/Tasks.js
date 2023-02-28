@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
-import UpdateTask from './UpdateTask'
+import { Link } from 'react-router-dom';
 
 const Tasks = () => {
     const [tasks, setTasks] = useState([]);
-    const [isUpdateShown, setUpdateShown] = useState(false);
-    const [updatingTask, setUpdatingTask] = useState({});
 
     useEffect(() => {
         fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks')
@@ -13,17 +10,10 @@ const Tasks = () => {
         .then(data => setTasks(data))
     }, []);
 
-    const handleUpdateTask = (e, task) => {
-        e.preventDefault();
-        // console.log(task);
-        setUpdateShown(true); 
-        setUpdatingTask(task);
-    }
 
-    const handleDeleteTask = async (e, task) => {
-        e.preventDefault();
-
-        await fetch('https://63f45ed32213ed989c414b54.mockapi.io/tasks/'+`${task.id}`, {
+    const handleDeleteTask = async (e, id) => {
+        console.log("in delete", id)
+        await fetch(`https://63f45ed32213ed989c414b54.mockapi.io/tasks/${id}`, {
             method: 'DELETE',
             }).then(res => {
             if (res.ok) {
@@ -59,8 +49,8 @@ const Tasks = () => {
                             <td>{ task.deadline }</td>
                             <td>{ task.createdAt }</td>
                             <td>{ task.isCompleted ? "Completed" : "Pending" }</td>
-                            <td><span className='btn btn-primary' onClick={(e)=> handleUpdateTask(e,task)}>Update</span></td>
-                            <td><span className='btn btn-danger' onClick={(e)=> handleDeleteTask(e,task)}>Delete</span></td>
+                            <td> <Link to={`/task/${task.id}/edit`} className='btn btn-info'>update</Link></td>
+                            <td><span className='btn btn-danger' onClick={(e)=> handleDeleteTask(e, task.id)}>Delete</span></td>
                         </tr>    
                     ))}
                 </tbody>
@@ -71,9 +61,7 @@ const Tasks = () => {
 
     return (
         <div>
-            {isUpdateShown ? <UpdateTask task={updatingTask} /> : <TableData />}
-
-                    
+            <TableData />    
         </div>
     );
 };

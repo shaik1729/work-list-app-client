@@ -1,8 +1,11 @@
 import React from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 const AddTask = () => {
+
+    const navigater = useNavigate();
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -20,7 +23,7 @@ const AddTask = () => {
             }).then(res => {
             if (res.ok) {
                 alert("Task Added");
-                window.location.reload(false);
+                navigater("/tasks");
             }
             }).catch(error => {
                 alert("Something went wrong");
